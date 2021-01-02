@@ -24,8 +24,14 @@ func sendNotificationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = fmt.Fprintf(w, "hello you")
-	helper.FailOnError(err)
+	// TODO: send HTTP request to TG api
+
+	res := map[string]interface{}{
+		"response": "Notification has been sent.",
+	}
+
+	err = ReturnResponse(w, res, http.StatusOK)
+	helper.SendApiError(w, err, http.StatusInternalServerError)
 }
 
 func Start() {
@@ -35,4 +41,13 @@ func Start() {
 	log.Printf("Listening on localhost:%v\n", config.Config["APP_PORT"])
 	err := http.ListenAndServe(fmt.Sprintf(":%v", config.Config["APP_PORT"]), router)
 	helper.FailOnError(err)
+}
+
+func ReturnResponse(w http.ResponseWriter, res map[string]interface{}, httpStatus int) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(httpStatus)
+
+	err := json.NewEncoder(w).Encode(res)
+
+	return err
 }

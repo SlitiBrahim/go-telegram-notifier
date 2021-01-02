@@ -12,26 +12,42 @@ import (
 )
 
 func sendNotificationHandler(w http.ResponseWriter, r *http.Request) {
-	var msg Message
-	err := json.NewDecoder(r.Body).Decode(&msg)
+	var notification Notification
+	err := json.NewDecoder(r.Body).Decode(&notification)
 	if err != nil {
-		helper.SendApiError(w, errors.New("invalid request body: cannot parse body to Message object"), http.StatusBadRequest)
+		helper.SendApiError(w, errors.New("invalid request body: cannot parse body to Notification object"), http.StatusBadRequest)
 		return
 	}
 
-	if msg.Message == "" {
+	if notification.Message == "" {
 		helper.SendApiError(w, errors.New("empty message passed"), http.StatusBadRequest)
 		return
 	}
 
-	// TODO: send HTTP request to TG api
-
-	res := map[string]interface{}{
-		"response": "Notification has been sent.",
+	msg := Message{
+		ChatID: config.Config["TG_CHAT_ID"].(string),
+		Text:   notification.Message,
 	}
 
-	err = ReturnResponse(w, res, http.StatusOK)
+	telegramResponse, err := sendMessage(msg)
 	helper.SendApiError(w, err, http.StatusInternalServerError)
+
+	if telegramResponse.StatusCode == http.StatusOK {
+		res := map[string]interface{}{
+			"message": "Notification has been sent.",
+		}
+
+		err = ReturnResponse(w, res, http.StatusOK)
+		helper.SendApiError(w, err, http.StatusInternalServerError)
+	} else {
+		res := map[string]interface{}{
+			"message": "Notification cannot be sent.",
+			"error":   err.Error(),
+		}
+
+		err = ReturnResponse(w, res, http.StatusBadRequest)
+		helper.SendApiError(w, err, http.StatusInternalServerError)
+	}
 }
 
 func Start() {

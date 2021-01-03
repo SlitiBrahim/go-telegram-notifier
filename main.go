@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-telegram-notifier/src/api"
+	"go-telegram-notifier/api"
 )
 
 func main() {

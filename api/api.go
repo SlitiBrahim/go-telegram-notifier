@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
-	"go-telegram-notifier/src/config"
-	"go-telegram-notifier/src/helper"
+	"go-telegram-notifier/config"
+	"go-telegram-notifier/helper"
 	"log"
 	"net/http"
 )

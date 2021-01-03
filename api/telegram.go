@@ -3,8 +3,8 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"go-telegram-notifier/src/config"
-	"go-telegram-notifier/src/helper"
+	"go-telegram-notifier/config"
+	"go-telegram-notifier/helper"
 	"net/http"
 	"net/url"
 	"path"

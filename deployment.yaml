@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: telegram-notifier
+---
+apiVersion: v1
+data:
+  APP_PORT: "80"
+  # set values here
+  TG_BOT_TOKEN: <chatbot-token>
+  TG_CHAT_ID: <chat-id>
+  TOKEN: <token>
+kind: ConfigMap
+metadata:
+  name: notifier-cm
+  namespace: telegram-notifier
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: telegram-notifier
+  name: telegram-notifier
+  namespace: telegram-notifier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegram-notifier
+  template:
+    metadata:
+      labels:
+        app: telegram-notifier
+    spec:
+      containers:
+        - image: slitibrahim/telegram-notifier
+          name: telegram-notifier
+          ports:
+            - name: http
+              containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: notifier-cm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telegram-notifier-svc
+  namespace: telegram-notifier
+spec:
+  selector:
+    app: telegram-notifier
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: telegram-notifier-ingress
+  namespace: telegram-notifier
+spec:
+  rules:
+    - host: notifier.sliti-brahim.com
+      http:
+        paths:
+        - backend:
+            serviceName: telegram-notifier-svc
+            servicePort: 80
+---

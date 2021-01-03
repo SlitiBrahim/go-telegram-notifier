@@ -11,7 +11,16 @@ import (
 	"net/http"
 )
 
+func authenticatedReq(r *http.Request) bool {
+	return r.Header.Get("token") == config.Config["TOKEN"]
+}
+
 func sendNotificationHandler(w http.ResponseWriter, r *http.Request) {
+	if authenticatedReq(r) == false {
+		helper.SendApiError(w, errors.New("invalid token"), http.StatusForbidden)
+		return
+	}
+
 	var notification Notification
 	err := json.NewDecoder(r.Body).Decode(&notification)
 	if err != nil {
